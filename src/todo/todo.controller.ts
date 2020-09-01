@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Request, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Request,
+  Req,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { TodoService } from './todo.service';
 
 import { CreateTodoDto } from './dto/creat-todo.dto';
@@ -9,20 +18,30 @@ export class TodoController {
   constructor(private readonly todoService: TodoService) {}
 
   @Post()
-  //console.log('request');@Req() request: Request
   async create(@Body() createTodoDto: CreateTodoDto) {
-    //async create(@Body() request: Body) {
-    //console.log(request);
-    //createTodoDto.createdAt = new Date();
-    //createTodoDto.updatedAt = new Date();
     return await this.todoService.create(createTodoDto);
-
-    //await this.todoService.create(request);
-    //createTodoDto;
   }
 
   @Get()
-  async findAll(): Promise<Todo[]> {
-    return await this.todoService.findAll();
+  async findAll(@Body() body) {
+    if (body._id) {
+      return await this.todoService.findId(body._id);
+    } else {
+      return await this.todoService.findAll();
+    }
+  }
+
+  @Delete()
+  async delete(@Body() body) {
+    if (body._id) {
+      return await this.todoService.delete(body._id);
+    } else {
+      return await this.todoService.deleteAll();
+    }
+  }
+
+  @Patch()
+  async update(@Body() body) {
+    return await this.todoService.update(body._id);
   }
 }
