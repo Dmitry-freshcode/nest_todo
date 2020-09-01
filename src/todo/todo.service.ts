@@ -8,7 +8,7 @@ import { Todo } from './schemas/todo.schemas';
 export class TodoService {
   constructor(@InjectModel('Todo') private readonly todoModel: Model<Todo>) {}
 
-  async create(createTodo: CreateTodoDto): Promise<Todo> {
+  async create(createTodo: CreateTodoDto): Promise<any> {
     const newTodo = new this.todoModel(createTodo);
     return await newTodo.save();
   }

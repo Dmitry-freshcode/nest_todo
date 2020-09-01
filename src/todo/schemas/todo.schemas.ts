@@ -2,7 +2,7 @@
 import { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Todo extends Document {
   @Prop()
   name: string;
@@ -12,6 +12,12 @@ export class Todo extends Document {
 
   @Prop()
   dueDate: Date;
+
+  @Prop()
+  createdAt: Date;
+
+  @Prop()
+  updatedAt: Date;
 }
 
 export const TodoSchema = SchemaFactory.createForClass(Todo);
