@@ -7,6 +7,9 @@ import {
   Req,
   Delete,
   Patch,
+  Param,
+  Query,
+  UseGuards
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 
@@ -15,7 +18,7 @@ import { Todo } from './schemas/todo.schemas';
 
 @Controller()
 export class TodoController {
-  constructor(private readonly todoService: TodoService) {}
+  constructor(private readonly todoService: TodoService) {}  
 
   @Post()
   async create(@Body() createTodoDto: CreateTodoDto) {
@@ -23,12 +26,21 @@ export class TodoController {
   }
 
   @Get()
-  async findAll(@Body() body) {
+  async findAll(@Body() body, @Query() query ){
+
     if (body._id) {
       return await this.todoService.findId(body._id);
-    } else {
-      return await this.todoService.findAll();
+    } else {     
+      if (query) {
+        return await this.todoService.findAll(query);
+      }else{
+        return await this.todoService.findAll({});
+      }
+      
     }
+
+    console.log(query)
+    return query;
   }
 
   @Delete()
