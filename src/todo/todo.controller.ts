@@ -3,18 +3,15 @@ import {
   Post,
   Body,
   Get,
-  Request,
-  Req,
   Delete,
-  Patch,
-  Param,
+  Patch, 
   Query,
   UseGuards
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 
 import { CreateTodoDto } from './dto/creat-todo.dto';
-import { Todo } from './schemas/todo.schemas';
+//import { Todo } from './schemas/todo.schemas';
 
 @Controller()
 export class TodoController {
@@ -35,12 +32,8 @@ export class TodoController {
         return await this.todoService.findAll(query);
       }else{
         return await this.todoService.findAll({});
-      }
-      
+      }      
     }
-
-    console.log(query)
-    return query;
   }
 
   @Delete()
