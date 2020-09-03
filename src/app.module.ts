@@ -20,6 +20,7 @@ const environment = process.env.NODE_ENV || 'development';
     MongooseModule.forRoot(process.env.MONGODB_WRITE_CONNECTION_STRING, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      useCreateIndex: true,
     }),
     AuthModule,
     UsersModule,
@@ -27,6 +28,6 @@ const environment = process.env.NODE_ENV || 'development';
   ],
   //controllers: [AppController],
   providers: [AuthModule],
-  controllers: [AppController],   
+  controllers: [AppController],
 })
 export class AppModule {}
