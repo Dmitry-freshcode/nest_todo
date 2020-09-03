@@ -1,32 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcrypt';
+import * as _ from 'lodash';
 
-export type User = any;
+import { IUser } from './interfaces/user.interface';
+import { Model } from 'mongoose';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
-export class UsersService {
-  private readonly users: User[];
+export class UserService {
+    constructor(@InjectModel('User') private readonly userModel: Model<IUser>){}
 
-  constructor() {
-    this.users = [
-      {
-        userId: 1,
-        username: 'john',
-        password: 'changeme',
-      },
-      {
-        userId: 2,
-        username: 'chris',
-        password: 'secret',
-      },
-      {
-        userId: 3,
-        username: 'maria',
-        password: 'guess',
-      },
-    ];
-  }
+    async create(createUserDto: CreateUserDto): Promise<IUser> {
+        console.log(createUserDto);
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hash = await bcrypt.hash(createUserDto.password, salt);
+        const createdUser = new this.userModel(_.assign(createUserDto, {password: hash}));
+        
+        return await createdUser.save();
+    }
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find(user => user.username === username);
-  }
+    async find(id: string): Promise<IUser> {
+        return await this.userModel.findById(id).exec();
+    }
+    async findOne(username: string): Promise<IUser | undefined> {
+        //console.log(username);
+        //const user =await this.userModel.findOne({name: username}).exec();
+        return await this.userModel.findOne({username: username}).exec();
+      }
 }
