@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-
 import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -13,6 +12,7 @@ const environment = process.env.NODE_ENV || 'development';
 @Module({
   imports: [
     TodoModule,
+    UsersModule,
     ConfigModule.forRoot({
       envFilePath: `.env.${environment}`,
       isGlobal: true,
@@ -22,8 +22,7 @@ const environment = process.env.NODE_ENV || 'development';
       useUnifiedTopology: true,
       useCreateIndex: true,
     }),
-    AuthModule,
-    UsersModule,
+    AuthModule,    
     //TokenModule,
   ],
   //controllers: [AppController],

@@ -19,20 +19,20 @@ export class AppController {
   ) {}
 
   @Post()
-  async addUser(@Body() body) {
-    return this.userService.create(body);
+  async sayHello() {
+    return "Server available";
   }
 
-  @UseGuards(LocalAuthGuard)
-  @Post('auth/login')
-  async login(@Body() body) {
-    //console.log(body);
-    return this.authService.login(body);
-  }
+  // @UseGuards(LocalAuthGuard)
+  // @Post('auth/login')
+  // async login(@Body() body) {
+  //   //console.log(body);
+  //   return this.authService.login(body);
+  // }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get('profile')
+  // getProfile(@Request() req) {
+  //   return req.user;
+  // }
 }

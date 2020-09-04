@@ -12,7 +12,7 @@ export class UserService {
     constructor(@InjectModel('User') private readonly userModel: Model<IUser>){}
 
     async create(createUserDto: CreateUserDto): Promise<IUser> {
-        console.log(createUserDto);
+        //console.log(createUserDto);
         const saltRounds = 10;
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(createUserDto.password, salt);
