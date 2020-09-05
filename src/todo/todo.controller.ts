@@ -4,9 +4,9 @@ import {
   Body,
   Get,
   Delete,
-  Patch, 
+  Patch,
   Query,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dto/creat-todo.dto';
@@ -17,28 +17,27 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('todo')
 export class TodoController {
-  constructor(private readonly todoService: TodoService) {}  
+  constructor(private readonly todoService: TodoService) {}
   @UseGuards(JwtAuthGuard)
-  @Post()
+  @Post('add')
   async create(@Body() createTodoDto: CreateTodoDto) {
     return await this.todoService.create(createTodoDto);
   }
   @UseGuards(JwtAuthGuard)
-  @Get()
-  async findAll(@Body() body, @Query() query ){
-
+  @Get('find')
+  async findAll(@Body() body, @Query() query) {
     if (body._id) {
       return await this.todoService.findId(body._id);
-    } else {     
+    } else {
       if (query) {
         return await this.todoService.findAll(query);
-      }else{
+      } else {
         return await this.todoService.findAll({});
-      }      
+      }
     }
   }
   @UseGuards(JwtAuthGuard)
-  @Delete()
+  @Delete('delete')
   async delete(@Body() body) {
     if (body._id) {
       return await this.todoService.delete(body._id);
@@ -47,7 +46,7 @@ export class TodoController {
     }
   }
   @UseGuards(JwtAuthGuard)
-  @Patch()
+  @Patch('state/update')
   async update(@Body() body) {
     return await this.todoService.update(body._id);
   }
