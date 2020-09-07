@@ -5,5 +5,3 @@ export const UserSchema = new mongoose.Schema({
     password: { type: String, required: true },
 });
 
-//UserSchema.index({ name: 1 }, { unique: true });
-//export const TodoSchema = SchemaFactory.createForClass(Todo);

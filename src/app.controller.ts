@@ -22,17 +22,4 @@ export class AppController {
   async sayHello() {
     return "Server available";
   }
-
-  // @UseGuards(LocalAuthGuard)
-  // @Post('auth/login')
-  // async login(@Body() body) {
-  //   //console.log(body);
-  //   return this.authService.login(body);
-  // }
-
-  // @UseGuards(JwtAuthGuard)
-  // @Get('profile')
-  // getProfile(@Request() req) {
-  //   return req.user;
-  // }
 }

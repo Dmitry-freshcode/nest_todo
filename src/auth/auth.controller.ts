@@ -11,8 +11,9 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Body() body) {
-    //console.log(body);
+  async login(@Body() body) {    
     return this.authService.login(body);
   }
+  
+
 }

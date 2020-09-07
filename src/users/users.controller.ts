@@ -4,7 +4,7 @@ import {
   UseGuards,
   Request,
   Get,
-  Post,
+  Post,  
 } from '@nestjs/common';
 import { UserService } from './users.service';
 
@@ -20,6 +20,7 @@ export class UsersController {
   @Post('add')
   async addUser(@Body() body) {
     return this.userService.create(body);
+    
   }
 
   @UseGuards(JwtAuthGuard)
