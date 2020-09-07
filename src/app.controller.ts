@@ -18,7 +18,7 @@ export class AppController {
     private userService: UserService,
   ) {}
 
-  @Post()
+  @Get()
   async sayHello() {
     return "Server available";
   }

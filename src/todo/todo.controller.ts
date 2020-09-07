@@ -41,9 +41,10 @@ export class TodoController {
   async delete(@Body() body) {
     if (body._id) {
       return await this.todoService.delete(body._id);
-    } else {
-      return await this.todoService.deleteAll();
-    }
+    } 
+    // else {
+    //   return await this.todoService.deleteAll();
+    // }
   }
   @UseGuards(JwtAuthGuard)
   @Patch('state/update')
