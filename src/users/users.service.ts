@@ -11,16 +11,21 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UserService {
   constructor(@InjectModel('User') private readonly userModel: Model<IUser>) {}
 
-  async create(createUserDto: CreateUserDto): Promise<IUser> { 
+  async create(createUserDto: CreateUserDto): Promise<object> { 
     try{
-      const saltRounds = 10;
-      const salt = await bcrypt.genSalt(saltRounds);
-      const hash = await bcrypt.hash(createUserDto.password, salt);    
-      const createdUser = new this.userModel(
-        _.assign(createUserDto, { password: hash }),
-      );     
-  
-      return await createdUser.save();
+      const isExist = await this.userModel.findOne({ username: createUserDto.username });      
+      if (!isExist){        
+          const saltRounds = 10;
+          const salt = await bcrypt.genSalt(saltRounds);
+          const hash = await bcrypt.hash(createUserDto.password, salt);    
+          const createdUser = new this.userModel(
+            _.assign(createUserDto, { password: hash }),
+          ); 
+          await createdUser.save()
+          return {status: 'userAdd'};
+      }else{
+        return {status: 'userIsExist'};
+      }
     }   catch{
       throw new HttpException('BAD_REQUEST : users.create', HttpStatus.BAD_REQUEST);
     }    
