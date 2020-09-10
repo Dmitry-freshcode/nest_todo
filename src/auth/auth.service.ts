@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import { LoginUserDto } from './dto/login-user-dto';
 //import { TokenService } from 'src/token/token.service';
 //import { CreateUserDto } from '../users/dto/create-user.dto';
 //import { SignOptions } from 'jsonwebtoken';
@@ -14,23 +15,21 @@ export class AuthService {
         private usersService: UserService,
         //private readonly tokenService: TokenService,
     ) { }
-    async validateUser(username: string, pass: string): Promise<any> {
-      
+    async validateUser(username: string, pass: string): Promise<any> {      
         const user = await this.usersService.findOne(username);    
         if(user) {
-          const compare = bcrypt.compare(pass, user.password);        
-        return compare && user;
+          const compare = await bcrypt.compare(pass, user.password); 
+          return compare && user;
         }                
         return false;
         
       }
-      async login(user: any) {        
-        //console.log(user);
-        const payload = { username: user.username };
-        return {
-          access_token: this.jwtService.sign(payload, {secret : process.env.JWT_SECRET
-          }),
-        };
+      async login(data:LoginUserDto):Promise<object> {    
+        const isExist =  await this.validateUser(data.username,data.password);        
+        const payload = { username: data.username };
+            return {
+              access_token: this.jwtService.sign(payload, {secret : process.env.JWT_SECRET}),
+            };             
       }
     
 

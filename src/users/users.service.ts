@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import { IUser } from './interfaces/user.interface';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,7 @@ export class UserService {
           await createdUser.save()
           return {status: 'userAdd'};
       }else{
+        //throw new UnauthorizedException({status:'user is Exist'}); 
         return {status: 'userIsExist'};
       }
     }   catch{
@@ -31,9 +33,11 @@ export class UserService {
     }    
   }
 
-  async find(id: string): Promise<IUser> {
+  async find(id: string): Promise<object> {
     try{
-      return await this.userModel.findById(id).exec();
+      const result =await this.userModel.findById(id).exec();
+      if (result){
+        return {status: 'user find'}} 
     } catch {
       throw new HttpException('BAD_REQUEST : users.find', HttpStatus.BAD_REQUEST);
     }    

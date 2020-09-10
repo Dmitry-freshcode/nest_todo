@@ -3,6 +3,7 @@ import { Controller , UseGuards, Post,Body} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 
+
 @Controller('auth')
 export class AuthController {
     constructor(
@@ -11,7 +12,8 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Body() body) {    
+  async login(@Body() body) {
+    //return {status:"login"};
     return this.authService.login(body);
   }
   
