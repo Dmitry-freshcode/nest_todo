@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Body,
+  Param,
   Get,
   Delete,
   Patch,
@@ -25,17 +26,24 @@ export class TodoController {
     return await this.todoService.create(createTodoDto);
   }
   @UseGuards(JwtAuthGuard)
-  @Get('find')
-  async findAll(@Body() body, @Query() query) {
+  @Get('find/byTodoId')
+  async find(@Body() body) {    
     if (body._id) {
-      return await this.todoService.findId(body._id);
-    } else {
-      if (query) {
-        return await this.todoService.findAll(query);
-      } else {
-        return await this.todoService.findAll({});
-      }
-    }
+      return await this.todoService.findId(body._id);}
+    return {
+      module: 'todo',
+      status: 'wrong todo id'}    
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('find/all')
+  async findAll(@Query() query) {      
+    if (query.username){    
+      return await this.todoService.findByUser(query.username,query);
+    } 
+    return {
+      module: 'todo',
+      status: 'wrong user name'}   
   }
   @UseGuards(JwtAuthGuard)
   @Delete('delete')

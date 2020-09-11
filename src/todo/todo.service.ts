@@ -9,7 +9,7 @@ export class TodoService {
   constructor(@InjectModel('Todo') private readonly todoModel: Model<Todo>) {}
 
   async create(createTodo: CreateTodoDto): Promise<Todo> {
-    try{
+    try{      
       const newTodo = new this.todoModel(createTodo);
     return await newTodo.save();
     }catch{
@@ -27,11 +27,11 @@ export class TodoService {
     
   }
 
-  async findAll(query): Promise<Todo[]> {
+  async findByUser(username,query?): Promise<Todo[]> {
     try{
       if (query.page > 0) {
         return await this.todoModel
-          .find()
+          .find({username : username})
           .skip(Number((query.page - 1) * query.perPage))
           .limit(Number(query.perPage))
           .exec();
