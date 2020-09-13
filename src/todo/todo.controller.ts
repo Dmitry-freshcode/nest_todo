@@ -46,8 +46,8 @@ export class TodoController {
       status: 'wrong user name'}   
   }
   @UseGuards(JwtAuthGuard)
-  @Delete('delete')
-  async delete(@Body() body) {
+  @Post('delete')
+  async delete(@Body() body) {    
     if (body._id) {
       return await this.todoService.delete(body._id);
     } 

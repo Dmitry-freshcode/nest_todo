@@ -36,7 +36,7 @@ export class TodoService {
           .limit(Number(query.perPage))
           .exec();
       }
-      return await this.todoModel.find().exec();
+      return await this.todoModel.find({username : username}).exec();
     } catch{
       throw new HttpException('BAD_REQUEST : todo.findAll', HttpStatus.BAD_REQUEST);
     }
