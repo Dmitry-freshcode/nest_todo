@@ -27,16 +27,24 @@ export class TodoService {
     
   }
 
-  async findByUser(username,query?): Promise<Todo[]> {
+  async findByUser(username,query?): Promise<Object> {
     try{
-      if (query.page > 0) {
-        return await this.todoModel
+      const todoAtPage = 10;
+      const todos = await this.todoModel.find({username : username}).exec();
+      const pages = Math.ceil((todos.length)/todoAtPage);
+      let currentPage = Number(query.page);
+      if (currentPage>pages){currentPage = pages}      
+      const pageOfTodo =  await this.todoModel
           .find({username : username})
-          .skip(Number((query.page - 1) * query.perPage))
-          .limit(Number(query.perPage))
-          .exec();
-      }
-      return await this.todoModel.find({username : username}).exec();
+          .skip(Number((currentPage-1) * todoAtPage))
+          .limit(Number(todoAtPage))
+          .sort({ dueDate : 'asc'})
+          .exec();     
+      // console.log(`pages: ${pages},currentPage: ${query.page}`);
+      // console.log(`todos : ${todos.length}`);
+      //console.log(currentPage)
+
+      return {todos: pageOfTodo,pages: pages,currentPage: currentPage};
     } catch{
       throw new HttpException('BAD_REQUEST : todo.findAll', HttpStatus.BAD_REQUEST);
     }
