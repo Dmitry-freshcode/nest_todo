@@ -25,8 +25,8 @@ export class UserService {
           await createdUser.save()
           return {status: 'userAdd'};
       }else{
-        //throw new UnauthorizedException({status:'user is Exist'}); 
-        return {status: 'userIsExist'};
+        throw new UnauthorizedException({status:'user is Exist'}); 
+        //return {status: 'userIsExist'};
       }
     }   catch{
       throw new HttpException('BAD_REQUEST : users.create', HttpStatus.BAD_REQUEST);
