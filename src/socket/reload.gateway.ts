@@ -25,6 +25,20 @@ export class ReloadGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async onReload(client){
         //client.broadcast.emit('reload');
         this.server.emit('reload');
-        console.log('reload DB');
+        //console.log('reload DB');
+    }
+
+    @SubscribeMessage('logout')
+    async onLogout(client){
+        //client.broadcast.emit('reload');
+        client.broadcast.emit('logout');
+        //console.log('logout');
+    }
+
+    @SubscribeMessage('login')
+    async onLogin(client){
+        //client.broadcast.emit('reload');
+        client.broadcast.emit('login');
+        //console.log('login');
     }
 }
