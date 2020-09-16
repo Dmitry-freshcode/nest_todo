@@ -5,12 +5,15 @@ import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AppController } from './app.controller';
+import { ReloadModule } from './socket/reload.module'
 //import { TokenModule } from './token/token.module';
 
 const environment = process.env.NODE_ENV || 'development';
 
+
 @Module({
   imports: [
+    ReloadModule,
     TodoModule,
     UsersModule,
     ConfigModule.forRoot({
