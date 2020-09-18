@@ -25,10 +25,13 @@ export class AuthService {
         
       }
       async login(data:LoginUserDto):Promise<object> {    
-        const isExist =  await this.validateUser(data.username,data.password);        
+        const isExist =  await this.validateUser(data.username,data.password);
+        const user = await this.usersService.findOne(data.username)        
         const payload = { username: data.username };
             return {
               access_token: this.jwtService.sign(payload, {secret : process.env.JWT_SECRET}),
+              username: user.username,
+              _id: user._id,
             };             
       }
     

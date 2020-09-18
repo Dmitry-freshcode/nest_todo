@@ -23,13 +23,13 @@ export class UserService {
             _.assign(createUserDto, { password: hash }),
           ); 
           await createdUser.save()
-          return {status: 'userAdd'};
+          return {statusCode: 201, message: "user created"};
       }else{
         throw new UnauthorizedException({status:'user is Exist'}); 
         //return {status: 'userIsExist'};
       }
-    }   catch{
-      throw new HttpException('BAD_REQUEST : users.create', HttpStatus.BAD_REQUEST);
+    }   catch{      
+      throw new HttpException('user is Exist', HttpStatus.BAD_REQUEST);
     }    
   }
 
