@@ -37,9 +37,10 @@ export class TodoController {
 
   @UseGuards(JwtAuthGuard)
   @Get('find/all')
-  async findAll(@Query() query) {      
+  async findAll(@Query() query) {  
+    //console.log(query)  ;   
     if (query.username){    
-      return await this.todoService.findByUser(query.username,query);
+      return await this.todoService.findByUser(query);
     } 
     return {
       module: 'todo',
@@ -58,6 +59,7 @@ export class TodoController {
   @UseGuards(JwtAuthGuard)
   @Patch('state/update')
   async update(@Body() body) {
-    return await this.todoService.update(body._id);
+    //console.log(body)
+    return await this.todoService.update(body.query);
   }
 }

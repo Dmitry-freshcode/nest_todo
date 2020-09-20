@@ -1,4 +1,4 @@
-import { Injectable ,HttpException,HttpStatus} from '@nestjs/common';
+import { Injectable ,HttpException,HttpStatus, Body} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateTodoDto } from './dto/creat-todo.dto';
@@ -9,7 +9,8 @@ export class TodoService {
   constructor(@InjectModel('Todo') private readonly todoModel: Model<Todo>) {}
 
   async create(createTodo: CreateTodoDto): Promise<Todo> {
-    try{      
+    try{    
+      //console.log(createTodo)  
       const newTodo = new this.todoModel(createTodo);
     return await newTodo.save();
     }catch{
@@ -27,24 +28,54 @@ export class TodoService {
     
   }
 
-  async findByUser(username,query?): Promise<Object> {
+  async findByUser(query): Promise<Object> {
     try{
-      const todoAtPage = 10;
-      const todos = await this.todoModel.find({username : username}).exec();
-      const pages = Math.ceil((todos.length)/todoAtPage);
-      let currentPage = Number(query.page);
-      if (currentPage>pages){currentPage = pages}      
-      const pageOfTodo =  await this.todoModel
-          .find({username : username})
-          .skip(Number((currentPage-1) * todoAtPage))
-          .limit(Number(todoAtPage))
-          .sort({ dueDate : 'asc'})
-          .exec();     
-      // console.log(`pages: ${pages},currentPage: ${query.page}`);
-      // console.log(`todos : ${todos.length}`);
-      //console.log(currentPage)
+      //console.log(query);
+      const {username , page, filter}= query;
+      const tasksAtPage = 10;
+      const taskAll = await this.todoModel.find({userId : username}).countDocuments().exec();
+      const taskCompleted = await this.todoModel.find({userId : username,state:true}).countDocuments().exec(); 
+      const taskNotCompleted = await this.todoModel.find({userId : username,state:false}).countDocuments().exec(); 
+     
+      let count,foundTasks;
+      switch (filter)  {
+        case('completed'):{
+          foundTasks = {userId : username,state:true};
+          count = taskCompleted;
+          break;
+        }
+        case('notCompleted'):{
+          foundTasks = {userId : username,state:false};
+          count = taskNotCompleted;
+          break;
+        }
+        default:{
+          foundTasks = {userId : username}; 
+          count = taskAll;
+        }
+      } 
 
-      return {todos: pageOfTodo,pages: pages,currentPage: currentPage};
+      const pages = Math.ceil((count)/tasksAtPage);
+      let currentPage = Number(page);
+      if (currentPage>pages){currentPage = pages}
+      //console.log(currentPage);
+      const tasks =  await this.todoModel
+          .find(foundTasks)
+          .skip(Number((currentPage-1) * tasksAtPage))
+          .limit(Number(tasksAtPage))
+          .sort({ dueDate : 'asc'})
+          .exec();  
+          //console.log(tasks);
+           
+     
+      return {
+        tasks: tasks,
+        pages: pages,
+        currentPage: currentPage,
+        tasksAll:taskAll,
+        tasksComplete: taskCompleted,
+        tasksNoCompleted:taskNotCompleted,
+      };
     } catch{
       throw new HttpException('BAD_REQUEST : todo.findAll', HttpStatus.BAD_REQUEST);
     }
@@ -67,14 +98,15 @@ export class TodoService {
     }
     
   }
-  async update(id: string): Promise<Object> {
+  async update(query): Promise<Object> {
       try{
-        if (await this.todoModel.findById(id).exec()) {
-          const [{ state: oldState }] = await this.todoModel
-            .find({ _id: id })
-            .exec();
+        //console.log(query);        
+        if (await this.todoModel.findById(query._id).exec()) {
+          // const [{ state: oldState }] = await this.todoModel
+          //   .find({ _id: id })
+          //   .exec();
           return await this.todoModel
-            .updateOne({ _id: id }, { state: !oldState })
+            .updateOne({ _id: query._id }, { state: !query.state })
             .exec();
         }
         return 'id is not find in DB';

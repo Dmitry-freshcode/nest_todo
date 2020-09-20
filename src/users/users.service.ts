@@ -50,4 +50,14 @@ export class UserService {
       throw new HttpException('BAD_REQUEST : users.findOne', HttpStatus.BAD_REQUEST);
     }    
   }
+
+  async getProfile(username: string): Promise<Object | undefined>{
+    const user = await this.findOne(username);
+    return {
+      username: user.username,
+      _id:user._id
+    }
+  }
+
+
 }
