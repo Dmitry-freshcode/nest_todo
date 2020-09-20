@@ -32,7 +32,7 @@ export class TodoService {
     try{
       //console.log(query);
       const {username , page, filter}= query;
-      const tasksAtPage = 10;
+      const tasksAtPage = 12;
       const taskAll = await this.todoModel.find({userId : username}).countDocuments().exec();
       const taskCompleted = await this.todoModel.find({userId : username,state:true}).countDocuments().exec(); 
       const taskNotCompleted = await this.todoModel.find({userId : username,state:false}).countDocuments().exec(); 
