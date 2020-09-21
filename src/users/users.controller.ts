@@ -19,6 +19,7 @@ export class UsersController {
 
   @Post('add')
   async addUser(@Body() body) {
+    console.log(body);
     return this.userService.create(body);
     
   }

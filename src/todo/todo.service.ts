@@ -1,22 +1,26 @@
-import { Injectable ,HttpException,HttpStatus, Body} from '@nestjs/common';
+import { Injectable ,HttpException,HttpStatus} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { truncateSync } from 'fs';
 import { Model } from 'mongoose';
 import { CreateTodoDto } from './dto/creat-todo.dto';
 import { Todo } from './schemas/todo.schemas';
+import {ReloadGateway} from '../socket/reload.gateway'
 
 @Injectable()
 export class TodoService {
-  constructor(@InjectModel('Todo') private readonly todoModel: Model<Todo>) {}
+  constructor(
+    @InjectModel('Todo') private readonly todoModel: Model<Todo>,   
+    private readonly ReloadGateway: ReloadGateway) {}
 
   async create(createTodo: CreateTodoDto): Promise<Todo> {
-    try{    
-      //console.log(createTodo)  
-      const newTodo = new this.todoModel(createTodo);
-    return await newTodo.save();
+    try{  
+    const newTodo = new this.todoModel(createTodo);
+    const result = await newTodo.save();
+    this.ReloadGateway.server.emit('refresh');
+      return result;
     }catch{
       throw new HttpException('BAD_REQUEST : todo.create', HttpStatus.BAD_REQUEST);
-    }
-    
+    }    
   }
 
   async findId(id: string): Promise<Todo[]> {
@@ -24,19 +28,43 @@ export class TodoService {
       return await this.todoModel.find({ _id: id });
     } catch{
       throw new HttpException('BAD_REQUEST : todo.findId', HttpStatus.BAD_REQUEST);
-    }
-    
+    }    
   }
 
   async findByUser(query): Promise<Object> {
-    try{
-      //console.log(query);
+    try{              
       const {username , page, filter}= query;
       const tasksAtPage = 12;
-      const taskAll = await this.todoModel.find({userId : username}).countDocuments().exec();
-      const taskCompleted = await this.todoModel.find({userId : username,state:true}).countDocuments().exec(); 
-      const taskNotCompleted = await this.todoModel.find({userId : username,state:false}).countDocuments().exec(); 
+      const totalTest = await this.todoModel.aggregate([
+        {
+            '$match': {
+                'userId': query.username
+            }
+        }, {
+            '$group': {
+                '_id': '$state', 
+                'count': {
+                    '$sum': 1
+                }
+            }
+        }
+    ]);      
+      let map = new Map();      
+      totalTest.forEach((elem)=>{
+        map.set(elem._id,elem.count);
+      })      
+      const taskNotCompleted = map.get(false)?map.get(false):0;      
+      const taskCompleted = map.get(true)?map.get(true):0;           
+      const taskAll = taskCompleted + taskNotCompleted;      
+
+      //const allTasks = await this.todoModel.find({userId : username});    
+      //const taskAll = allTasks.length;
+      //const taskCompleted = allTasks.filter((elem)=>elem.state===true).length;
+      //const taskNotCompleted = allTasks.filter((elem)=>elem.state===false).length;      
      
+      //const taskCompleted = await this.todoModel.find({userId : username, state:true}).countDocuments(); 
+      //const taskNotCompleted = await this.todoModel.find({userId : username,state:false}).countDocuments();    
+      
       let count,foundTasks;
       switch (filter)  {
         case('completed'):{
@@ -54,65 +82,61 @@ export class TodoService {
           count = taskAll;
         }
       } 
-
       const pages = Math.ceil((count)/tasksAtPage);
-      let currentPage = Number(page);
-      if (currentPage>pages){currentPage = pages}
-      //console.log(currentPage);
+      let currentPage = Number(page) || 1;
+      if (currentPage>pages){currentPage = pages};      
+      let skip = ((currentPage-1) * tasksAtPage);
+      if (skip<0){skip = 0};      
       const tasks =  await this.todoModel
           .find(foundTasks)
-          .skip(Number((currentPage-1) * tasksAtPage))
+          .skip(Number(skip))
           .limit(Number(tasksAtPage))
           .sort({ dueDate : 'asc'})
-          .exec();  
-          //console.log(tasks);
-           
-     
+          .exec();
+      
       return {
         tasks: tasks,
         pages: pages,
         currentPage: currentPage,
         tasksAll:taskAll,
         tasksComplete: taskCompleted,
-        tasksNoCompleted:taskNotCompleted,
+        tasksNoCompleted:taskNotCompleted,   
       };
     } catch{
       throw new HttpException('BAD_REQUEST : todo.findAll', HttpStatus.BAD_REQUEST);
     }
     }
-   
 
-  async deleteAll(): Promise<Object> {
-    try{
-      return await this.todoModel.deleteMany({}).exec();
-    } catch{
-      throw new HttpException('BAD_REQUEST : todo.deleteAll', HttpStatus.BAD_REQUEST);
-    }
-    
-  }
   async delete(id: string): Promise<Object> {
-    try{
-      return await this.todoModel.deleteOne({ _id: id });
+    try{      
+      const result = await this.todoModel.deleteOne({ _id: id });
+      this.ReloadGateway.server.emit('refresh');
+      return result;
     } catch{
       throw new HttpException('BAD_REQUEST : todo.delete', HttpStatus.BAD_REQUEST);
-    }
-    
+    }    
   }
   async update(query): Promise<Object> {
-      try{
-        //console.log(query);        
-        if (await this.todoModel.findById(query._id).exec()) {
-          // const [{ state: oldState }] = await this.todoModel
-          //   .find({ _id: id })
-          //   .exec();
-          return await this.todoModel
+      try{              
+        if (await this.todoModel.findById(query._id).exec()) { 
+            const result =await this.todoModel
             .updateOne({ _id: query._id }, { state: !query.state })
             .exec();
+            this.ReloadGateway.server.emit('refresh');
+          return result;
         }
         return 'id is not find in DB';
       }catch{
         throw new HttpException('BAD_REQUEST : todo.update', HttpStatus.BAD_REQUEST);
       }
-    }
-  
+    }  
 }
+
+  // async deleteAll(): Promise<Object> {
+  //   try{
+  //     return await this.todoModel.deleteMany({}).exec();
+  //   } catch{
+  //     throw new HttpException('BAD_REQUEST : todo.deleteAll', HttpStatus.BAD_REQUEST);
+  //   }
+    
+  // }
