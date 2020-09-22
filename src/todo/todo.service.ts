@@ -1,31 +1,30 @@
 import { Injectable ,HttpException,HttpStatus} from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { truncateSync } from 'fs';
+//import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateTodoDto } from './dto/creat-todo.dto';
 import { Todo } from './schemas/todo.schemas';
 import {ReloadGateway} from '../socket/reload.gateway'
+import { TodoRepository } from './todo.reposiory';
 
 @Injectable()
 export class TodoService {
-  constructor(
-    @InjectModel('Todo') private readonly todoModel: Model<Todo>,   
-    private readonly ReloadGateway: ReloadGateway) {}
+  constructor(     
+    private readonly ReloadGateway: ReloadGateway,
+    private todoDB:TodoRepository) {}
 
-  async create(createTodo: CreateTodoDto): Promise<Todo> {
+  create(createTodo: CreateTodoDto): Promise<Todo> {
     try{  
-    const newTodo = new this.todoModel(createTodo);
-    const result = await newTodo.save();
-    this.ReloadGateway.server.emit('refresh');
+      const result = this.todoDB.create(createTodo);
+      this.ReloadGateway.server.emit('refresh');
       return result;
     }catch{
       throw new HttpException('BAD_REQUEST : todo.create', HttpStatus.BAD_REQUEST);
     }    
   }
 
-  async findId(id: string): Promise<Todo[]> {
+  findId(id: string): Promise<Todo> {
     try{
-      return await this.todoModel.find({ _id: id });
+        return this.todoDB.findTodo({ _id: id });      
     } catch{
       throw new HttpException('BAD_REQUEST : todo.findId', HttpStatus.BAD_REQUEST);
     }    
@@ -35,24 +34,9 @@ export class TodoService {
     try{              
       const {username , page, filter}= query;
       const tasksAtPage = 12;
-      const totalTest = await this.todoModel.aggregate([
-        {
-            '$match': {
-                'userId': query.username
-            }
-        }, {
-            '$group': {
-                '_id': '$state', 
-                'count': {
-                    '$sum': 1
-                }
-            }
-        }
-    ]);      
-      
+      const totalTest = await this.todoDB.getTasksState(query);  
       let taskNotCompleted = 0;
       let taskCompleted=0;
-      
       totalTest.forEach((elem)=>{
         if(elem._id === false) {
           taskNotCompleted=elem.count;
@@ -61,16 +45,7 @@ export class TodoService {
           taskCompleted=elem.count;
         }        
       })       
-      const taskAll = taskCompleted + taskNotCompleted;      
-
-      //const allTasks = await this.todoModel.find({userId : username});    
-      //const taskAll = allTasks.length;
-      //const taskCompleted = allTasks.filter((elem)=>elem.state===true).length;
-      //const taskNotCompleted = allTasks.filter((elem)=>elem.state===false).length;      
-     
-      //const taskCompleted = await this.todoModel.find({userId : username, state:true}).countDocuments(); 
-      //const taskNotCompleted = await this.todoModel.find({userId : username,state:false}).countDocuments();    
-      
+      const taskAll = taskCompleted + taskNotCompleted;    
       let count,foundTasks;
       switch (filter)  {
         case('completed'):{
@@ -92,14 +67,12 @@ export class TodoService {
       let currentPage = Number(page) || 1;
       if (currentPage>pages){currentPage = pages};      
       let skip = ((currentPage-1) * tasksAtPage);
-      if (skip<0){skip = 0};      
-      const tasks =  await this.todoModel
-          .find(foundTasks)
-          .skip(Number(skip))
-          .limit(Number(tasksAtPage))
-          .sort({ dueDate : 'asc'})
-          .exec();
-      
+      if (skip<0){skip = 0};  
+      const tasks = await this.todoDB.getPageTasks({
+        foundTasks,
+        skip,
+        tasksAtPage,        
+      }); 
       return {
         tasks: tasks,
         pages: pages,
@@ -110,12 +83,12 @@ export class TodoService {
       };
     } catch{
       throw new HttpException('BAD_REQUEST : todo.findAll', HttpStatus.BAD_REQUEST);
-    }
+      }
     }
 
   async delete(id: string): Promise<Object> {
-    try{      
-      const result = await this.todoModel.deleteOne({ _id: id });
+    try{   
+      const result = this.todoDB.delete(id);
       this.ReloadGateway.server.emit('refresh');
       return result;
     } catch{
@@ -123,14 +96,12 @@ export class TodoService {
     }    
   }
   async update(query): Promise<Object> {
-      try{              
-        if (await this.todoModel.findById(query._id).exec()) { 
-            const result =await this.todoModel
-            .updateOne({ _id: query._id }, { state: !query.state })
-            .exec();
-            this.ReloadGateway.server.emit('refresh');
+      try{        
+        if(await this.todoDB.findTodo({ _id:query._id })){
+          const result = this.todoDB.updateTodo({ _id: query._id },{ state: !query.state })
+          this.ReloadGateway.server.emit('refresh');
           return result;
-        }
+        }     
         return 'id is not find in DB';
       }catch{
         throw new HttpException('BAD_REQUEST : todo.update', HttpStatus.BAD_REQUEST);

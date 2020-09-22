@@ -12,22 +12,19 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    //private authService: AuthService,
+  constructor( 
     private userService: UserService,
   ) {}
 
   @Post('add')
-  async addUser(@Body() body) {
-    console.log(body);
+  async addUser(@Body() body) {    
     return this.userService.create(body);
     
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
-    //console.log(req.user);
+  getProfile(@Request() req) {    
     return this.userService.getProfile(req.user.username);
   }
 }

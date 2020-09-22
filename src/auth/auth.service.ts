@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login-user-dto';
+import { UserRepository } from 'src/users/user.repository';
 //import { TokenService } from 'src/token/token.service';
 //import { CreateUserDto } from '../users/dto/create-user.dto';
 //import { SignOptions } from 'jsonwebtoken';
@@ -12,7 +13,7 @@ import { LoginUserDto } from './dto/login-user-dto';
 export class AuthService {
     constructor(
         private readonly jwtService: JwtService,
-        private usersService: UserService,
+        private usersService: UserService,        
         //private readonly tokenService: TokenService,
     ) { }
     async validateUser(username: string, pass: string): Promise<any> {      
