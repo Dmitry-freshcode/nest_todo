@@ -49,12 +49,18 @@ export class TodoService {
             }
         }
     ]);      
-      let map = new Map();      
+      
+      let taskNotCompleted = 0;
+      let taskCompleted=0;
+      
       totalTest.forEach((elem)=>{
-        map.set(elem._id,elem.count);
-      })      
-      const taskNotCompleted = map.get(false)?map.get(false):0;      
-      const taskCompleted = map.get(true)?map.get(true):0;           
+        if(elem._id === false) {
+          taskNotCompleted=elem.count;
+        }
+        if(elem._id === true) {
+          taskCompleted=elem.count;
+        }        
+      })       
       const taskAll = taskCompleted + taskNotCompleted;      
 
       //const allTasks = await this.todoModel.find({userId : username});    
