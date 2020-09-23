@@ -36,12 +36,14 @@
     "dotenv": "^8.2.0",
     "mongoose": "^5.10.2",
     "passport": "^0.4.1",
+    "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
-    "swagger-ui-express": "^4.1.4"
+    "swagger-ui-express": "^4.1.4",
+    "yup": "^0.29.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.0.0",

@@ -8,10 +8,12 @@ import {
   Patch,
   Query,
   UseGuards,
+  UsePipes
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dto/creat-todo.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ValidationPipe } from './validation.pipe'
 
 //import { AuthService } from './auth/auth.service';
 //import { Todo } from './schemas/todo.schemas';
@@ -22,6 +24,7 @@ export class TodoController {
   
   @UseGuards(JwtAuthGuard)
   @Post('add')
+  //@UsePipes(new ValidationPipe())
   async create(@Body() createTodoDto: CreateTodoDto) {
     return await this.todoService.create(createTodoDto);
   }

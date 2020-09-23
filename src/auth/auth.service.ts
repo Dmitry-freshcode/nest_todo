@@ -16,7 +16,8 @@ export class AuthService {
         private usersService: UserService,        
         //private readonly tokenService: TokenService,
     ) { }
-    async validateUser(username: string, pass: string): Promise<any> {      
+    async validateUser(username: string, pass: string): Promise<any> { 
+           
         const user = await this.usersService.findOne(username);    
         if(user) {
           const compare = await bcrypt.compare(pass, user.password); 

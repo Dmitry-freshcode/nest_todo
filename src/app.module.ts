@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module,NestModule,MiddlewareConsumer,RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TodoModule } from './todo/todo.module';
@@ -7,7 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AppController } from './app.controller';
 import { ReloadModule } from './socket/reload.module'
 //import { TokenModule } from './token/token.module';
-
+import { LoggerMiddleware } from './users/logger.middleware';
 const environment = process.env.NODE_ENV || 'development';
 
 
@@ -33,3 +33,10 @@ const environment = process.env.NODE_ENV || 'development';
   controllers: [AppController],
 })
 export class AppModule {}
+// implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer
+//       .apply(LoggerMiddleware)
+//       .forRoutes({ path: '*', method: RequestMethod.ALL });
+//   }
+// }

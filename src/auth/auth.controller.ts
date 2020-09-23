@@ -1,21 +1,40 @@
-import { Controller , UseGuards, Post,Body} from '@nestjs/common';
-
+import { Controller , UseGuards, Post,Body, Get,Req } from '@nestjs/common';
+import { AppService } from './app.service';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
+import {GoogleAuthGuard} from './google-auth.guard'
+
 
 
 @Controller('auth')
+
 export class AuthController {
     constructor(
-        private authService: AuthService,       
+        private authService: AuthService,
+        private readonly appService: AppService       
       ) {}
 
-  @UseGuards(LocalAuthGuard)
+  
+  @UseGuards(LocalAuthGuard)  
   @Post('login')
   async login(@Body() body) {
+    //console.log(body)
     //return {status:"login"};
     return this.authService.login(body);
   }
-  
 
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuth(@Req() req) {
+    console.log(req);
+    return this.appService.googleLogin(req);
+  }
+
+  @Get('succsess')
+  @UseGuards(GoogleAuthGuard)
+  googleAuthRedirect(@Req() req) {
+    console.log(req);
+    return this.appService.googleLogin(req)
+  }
+  
 }
