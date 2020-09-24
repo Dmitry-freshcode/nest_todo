@@ -23,14 +23,14 @@ export class AuthController {
     return this.authService.login(body);
   }
 
-  @Get('google')
+  @Post('google')
   @UseGuards(GoogleAuthGuard)
   async googleAuth(@Req() req) {
     console.log(req);
     return this.appService.googleLogin(req);
   }
 
-  @Get('succsess')
+  @Post('succsess')
   @UseGuards(GoogleAuthGuard)
   googleAuthRedirect(@Req() req) {
     console.log(req);
